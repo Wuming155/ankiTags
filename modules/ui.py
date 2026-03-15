@@ -38,9 +38,34 @@ class UIManager:
         
         # API Key
         ttk.Label(config_frame, text="API Key:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        
+        # API Key输入框框架
+        api_key_frame = ttk.Frame(config_frame)
+        api_key_frame.grid(row=0, column=1, padx=5, pady=5, sticky="we")
+        
+        # 实际存储API Key的变量
         self.api_key_var = tk.StringVar(value=self.app.config.get_api_key())
-        ttk.Entry(config_frame, textvariable=self.api_key_var, width=30).grid(row=0, column=1, padx=5, pady=5, sticky="we")
-        self.api_key_var.trace_add("write", self.app.on_api_key_change)
+        
+        # 初始化显示为星号
+        self.api_key_visible = False
+        
+        # API Key输入框，直接绑定到实际API Key变量
+        self.api_key_entry = ttk.Entry(api_key_frame, textvariable=self.api_key_var, width=30, show="*")
+        self.api_key_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
+        # 绑定焦点事件
+        self.api_key_entry.bind("<FocusIn>", self.on_api_key_focus_in)
+        self.api_key_entry.bind("<FocusOut>", self.on_api_key_focus_out)
+        
+        # 眼睛图标按钮（切换显示/隐藏）
+        self.toggle_api_key_button = ttk.Button(api_key_frame, text="👁", width=3, command=self.toggle_api_key_visibility)
+        self.toggle_api_key_button.pack(side=tk.RIGHT, padx=(5, 0))
+        
+        # 绑定输入事件，当用户输入时更新配置
+        self.api_key_var.trace_add("write", self.on_api_key_entry_change)
+        
+        # 初始化显示
+        self.update_api_key_display()
         
         # API服务选择
         ttk.Label(config_frame, text="API服务:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
@@ -137,14 +162,18 @@ class UIManager:
         self.prompt_text.grid(row=1, column=1, padx=5, pady=5, sticky="we", columnspan=2)
         self.prompt_text.insert(tk.END, self.app.config.get_default_prompt())
         
+        # Prompt操作按钮 - 水平排列
+        button_frame = ttk.Frame(prompt_frame)
+        button_frame.grid(row=2, column=1, padx=5, pady=5, sticky="we", columnspan=2)
+        
         # 保存Prompt按钮
-        ttk.Button(prompt_frame, text="保存当前Prompt", command=self.app.save_current_prompt).grid(row=2, column=1, padx=5, pady=5, sticky="e")
+        ttk.Button(button_frame, text="保存当前Prompt", command=self.app.save_current_prompt).pack(side=tk.LEFT, padx=5)
         
         # 删除Prompt按钮
-        ttk.Button(prompt_frame, text="删除当前Prompt", command=self.app.delete_current_prompt).grid(row=3, column=1, padx=5, pady=5, sticky="e")
+        ttk.Button(button_frame, text="删除当前Prompt", command=self.app.delete_current_prompt).pack(side=tk.LEFT, padx=5)
         
         # 重置为默认Prompt按钮
-        ttk.Button(prompt_frame, text="重置为默认", command=self.app.reset_to_default_prompt).grid(row=4, column=1, padx=5, pady=5, sticky="e")
+        ttk.Button(button_frame, text="重置为默认", command=self.app.reset_to_default_prompt).pack(side=tk.LEFT, padx=5)
         
         # 操作区域 - 使用滚动条
         action_frame = ttk.LabelFrame(left_frame, text="操作")
@@ -219,3 +248,34 @@ class UIManager:
         self.tree.pack(fill="both", expand=True)
         
         # 初始化Prompt列表 - 移到AnkiTagger类中初始化
+    
+    def toggle_api_key_visibility(self):
+        """切换API Key的显示/隐藏状态"""
+        self.api_key_visible = not self.api_key_visible
+        self.update_api_key_display()
+        
+    def update_api_key_display(self):
+        """更新API Key的显示状态"""
+        if self.api_key_visible:
+            self.api_key_entry.config(show="")
+            self.toggle_api_key_button.config(text="👁️")
+        else:
+            # 显示星号
+            self.api_key_entry.config(show="*")
+            self.toggle_api_key_button.config(text="👁")
+        
+    def on_api_key_entry_change(self, *args):
+        """API Key输入框内容变化时的处理"""
+        # 避免在初始化过程中调用
+        if hasattr(self.app, 'ui'):
+            self.app.on_api_key_change()
+    
+    def on_api_key_focus_in(self, event):
+        """API Key输入框获得焦点时的处理"""
+        # 获得焦点时不自动修改可见性，由眼睛按钮控制
+        pass
+    
+    def on_api_key_focus_out(self, event):
+        """API Key输入框失去焦点时的处理"""
+        # 失去焦点时不自动修改可见性，由眼睛按钮控制
+        pass

@@ -38,14 +38,14 @@ class AnkiTagger:
         # 初始化UI
         self.ui = UIManager(self.root, self)
         
-        # 初始化Prompt列表
-        self.refresh_prompts()
-        
         # 初始化AI客户端
         self.update_ai_client()
         
         # 加载保存的模型列表
         self.load_saved_models()
+        
+        # 初始化Prompt列表
+        self.refresh_prompts()
     
     def update_ai_client(self):
         """更新AI客户端"""
