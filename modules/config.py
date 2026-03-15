@@ -1,4 +1,4 @@
-import configparser
+import json
 import os
 
 class ConfigManager:
@@ -13,12 +13,12 @@ class ConfigManager:
             # 正常运行的情况
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
-        self.api_config_file = os.path.join(base_dir, "api_config.ini")
-        self.prompt_config_file = os.path.join(base_dir, "prompt_config.ini")
+        self.api_config_file = os.path.join(base_dir, "api_config.json")
+        self.prompt_config_file = os.path.join(base_dir, "prompt_config.json")
         
         # 初始化配置
-        self.api_config = configparser.ConfigParser()
-        self.prompt_config = configparser.ConfigParser()
+        self.api_config = {}
+        self.prompt_config = {}
         
         # 加载配置
         self.load_config()
@@ -27,7 +27,8 @@ class ConfigManager:
         """加载配置文件"""
         # 加载API配置
         if os.path.exists(self.api_config_file):
-            self.api_config.read(self.api_config_file, encoding="utf-8")
+            with open(self.api_config_file, "r", encoding="utf-8") as f:
+                self.api_config = json.load(f)
         
         # 确保API部分存在
         if "API" not in self.api_config:
@@ -40,7 +41,8 @@ class ConfigManager:
         
         # 加载Prompt配置
         if os.path.exists(self.prompt_config_file):
-            self.prompt_config.read(self.prompt_config_file, encoding="utf-8")
+            with open(self.prompt_config_file, "r", encoding="utf-8") as f:
+                self.prompt_config = json.load(f)
         
         # 确保Prompt部分存在
         if "Prompt" not in self.prompt_config:
@@ -56,12 +58,12 @@ class ConfigManager:
     def save_api_config(self):
         """保存API配置文件"""
         with open(self.api_config_file, "w", encoding="utf-8") as f:
-            self.api_config.write(f)
+            json.dump(self.api_config, f, ensure_ascii=False, indent=2)
     
     def save_prompt_config(self):
         """保存Prompt配置文件"""
         with open(self.prompt_config_file, "w", encoding="utf-8") as f:
-            self.prompt_config.write(f)
+            json.dump(self.prompt_config, f, ensure_ascii=False, indent=2)
     
     def get_api_key(self):
         return self.api_config["API"].get("api_key", "")

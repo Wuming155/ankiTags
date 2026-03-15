@@ -1,5 +1,5 @@
-/api_config.ini
-/config.ini
+/api_config.json
+/prompt_config.json
 __pycache__/
 **/__pycache__/
 *.pyc
